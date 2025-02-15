@@ -1,12 +1,12 @@
-// app/api/permissions/route.ts
-import prisma from "@/lib/prisma";
+import { db } from "@/db";
+import { permission } from "@/db/schema";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     // Fetch all permissions from the database
-    const permissions = await prisma.permission.findMany();
-    return NextResponse.json(permissions, { status: 200 });
+    const allPermissions = await db.select().from(permission);
+    return NextResponse.json(allPermissions, { status: 200 });
   } catch (error) {
     console.error("Error fetching permissions:", error);
     return NextResponse.json(

@@ -5,6 +5,7 @@ import {
   timestamp,
   boolean,
   int,
+  uniqueIndex,
 } from "drizzle-orm/mysql-core";
 
 export const user = mysqlTable("user", {
@@ -58,14 +59,14 @@ export const verification = mysqlTable("verification", {
 });
 
 export const permission = mysqlTable("permission", {
-  id: int("id").primaryKey(),
+  id: int("id").primaryKey().autoincrement(),
   name: text("name").notNull(),
   description: text("description"),
 });
 
 // Role Table (corrected table name)
 export const role = mysqlTable("role", {
-  id: int("id").primaryKey(),
+  id: int("id").primaryKey().autoincrement(),
   name: text("name").notNull(),
 });
 
@@ -80,14 +81,20 @@ export const rolePermissions = mysqlTable("role_permissions", {
 });
 
 // UserRoles Table (Many-to-Many between users and roles)
-export const userRoles = mysqlTable("user_roles", {
-  userId: varchar("user_id", { length: 36 })
-    .notNull()
-    .references(() => user.id),
-  roleId: int("role_id")
-    .notNull()
-    .references(() => role.id),
-});
+export const userRoles = mysqlTable(
+  "user_roles",
+  {
+    userId: varchar("user_id", { length: 36 })
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    roleId: int("role_id")
+      .notNull()
+      .references(() => role.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    uniqueIndex("user_roles_user_id_idx").on(table.userId),
+  ]
+);
 
 // Exporting the schema
 export const schema = {
